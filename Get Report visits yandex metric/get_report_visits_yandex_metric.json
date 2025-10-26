@@ -1,0 +1,22 @@
+{
+  "name": "get_report_visits_yandex_metric",
+  "description": "Функция отправляет запрос к API, получает данные по визитам, пользователям, просмотрам и качеству трафика, и возвращает результат в формате CSV-строки.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "ids": {
+        "type": "string",
+        "description": "ID счётчика Яндекс.Метрики (например, '44147844' для демо-счётчика)."
+      },
+      "date1": {
+        "type": "string",
+        "description": "Начальная дата периода в формате YYYY-MM-DD (опционально)."
+      },
+      "date2": {
+        "type": "string",
+        "description": "Конечная дата периода в формате YYYY-MM-DD (опционально)."
+      }
+    },
+    "required": ["ids"]
+  }
+}
