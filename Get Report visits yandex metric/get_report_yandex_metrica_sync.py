@@ -1,4 +1,4 @@
-def get_report_visits_yandex_metric(arguments: dict) -> str:
+def get_report_yandex_metrica_sync(arguments: dict) -> str:
     """
     Формирует отчёт из Яндекс.Метрики (Reports API) в синхронном режиме
     и возвращает результат в виде строки (CSV или JSON).
@@ -22,8 +22,8 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
             - split (bool, optional): включить авто‑дробление диапазона дат (по умолчанию True).
             - timeout (int, optional): общий лимит времени выполнения функции в секундах (по умолчанию 60).
                 • Все подзапросы делят этот лимит; если он исчерпан — выполнение прерывается.
-            - batch_size (int, optional): лимит строк на страницу (по умолчанию 10000).
-            - max_rows (int, optional): максимальное количество строк для выгрузки (по умолчанию без лимита).
+            - batch_size (int, optional): лимит строк на страницу (по умолчанию 5000).
+            - max_rows (int, optional): максимальное количество строк для выгрузки (10 000).
             - output_format (str, optional): формат результата: "csv" или "json" (по умолчанию "csv").
 
     Returns:
@@ -33,7 +33,7 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
         * Если заданы metrics и dimensions — они перекрывают preset (работает ручной режим).
         * В параметре filters можно использовать только dimensions, метрики там не поддерживаются.
         * В параметре sort можно указывать только поля, которые реально присутствуют в metrics или dimensions.
-        * API возвращает максимум 10000 строк за один запрос; для больших выборок используется offset.
+        * API возвращает максимум batch_size !> 100 000 строк за один запрос; для больших выборок используется offset.
         * Даже при использовании offset общее количество строк может быть ограничено самим API.
         * Множественные периоды (comparisonMode) не поддерживаются.
         * Если API возвращает метрики как вложенные списки ([[...]]),
@@ -48,21 +48,20 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
     """
 
     # def upload_to_tmpfiles(df: pd.DataFrame, output_format: str = "csv") -> str:
-    #     """
-	# 	Сохраняет DataFrame во временный файл и загружает его на tmpfiles.org
-	# 	"""
+    #   """
+    # 	Сохраняет DataFrame во временный файл и загружает его на tmpfiles.org
+    # 	"""
     #
     # def fetch_chunk_all_pages_streaming(url, params, headers, batch_size, output_format="csv", file_path="report.csv"):
-    #     """
-	# 	Стриминговая выгрузка: постранично пишет результат в файл (CSV или NDJSON),
-	# 	не накапливая все строки в памяти.
-	# 	"""
+    #   """
+    # 	Стриминговая выгрузка: постранично пишет результат в файл (CSV или NDJSON),
+    # 	не накапливая все строки в памяти.
+    # 	"""
 
     import os
     import requests
     import pandas as pd
     import json
-    import logging
     import time
     from datetime import datetime, timedelta
 
@@ -71,16 +70,12 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
         """Специализированное исключение для ошибок работы с API Яндекс.Метрики"""
         pass
 
-    # --- Настройка логирования ---
-    log_level = arguments.get("log_level", "INFO").upper()
-    logging.basicConfig(
-        level=getattr(logging, log_level, logging.INFO),
-        format="%(asctime)s [%(levelname)s] %(message)s"
-    )
-
     API_URL = "https://api-metrika.yandex.net/stat/v1/data"
+    MAX_ROWS = 10000
+    BATCH_SIZE = 5000
+    TIME_OUT = 30
     start_time = time.perf_counter()  # ⏱ старт замера общего времени выполнения
-    global_timeout = int(arguments.get("timeout", 60))  # общий лимит времени на всю функцию
+    global_timeout = int(arguments.get("timeout", TIME_OUT))  # общий лимит времени на всю функцию
 
     # --- Функция вычисления остатка времени ---
     def remaining_timeout() -> float:
@@ -192,8 +187,8 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
                 try:
                     error_json = resp.json()
                     message = (
-                        error_json.get("message")
-                        or error_json.get("errors", [{}])[0].get("message", "")
+                            error_json.get("message")
+                            or error_json.get("errors", [{}])[0].get("message", "")
                     )
                 except Exception:
                     message = resp.text
@@ -253,18 +248,17 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
 
             # проверка max_rows
             if max_rows and len(all_rows) >= max_rows:
-                logging.warning(f"Достигнут лимит max_rows={max_rows}, обрезаем результат")
+                print(f"Достигнут лимит max_rows={max_rows}, обрезаем результат")
                 all_rows = all_rows[:max_rows]
                 break
 
-            # ✅ ЕДИНСТВЕННАЯ проверка окончания данных
             if len(data_rows) < batch_size:
                 break
 
             offset += batch_size
 
         if sampled_global:
-            logging.warning("⚠️ Данные усечены (sampled=True) — отчёт может быть неполным")
+            print("⚠️ Данные усечены (sampled=True) — отчёт может быть неполным")
 
         return {"query": query, "data": all_rows}
 
@@ -280,8 +274,8 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
     lang = arguments.get("lang", "en")
     token = arguments.get("token") or os.getenv("YANDEX_METRIKA_TOKEN")
     split = arguments.get("split", True)
-    batch_size = int(arguments.get("batch_size", 10000))
-    max_rows = int(arguments.get("max_rows", 0)) or None
+    batch_size = int(arguments.get("batch_size", BATCH_SIZE))
+    max_rows = int(arguments.get("max_rows", 0)) or MAX_ROWS
     output_format = arguments.get("output_format", "csv")
 
     use_manual_config = bool(metrics and dimensions)
@@ -338,7 +332,7 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
 
         # Если достигнут общий лимит строк — останавливаем выгрузку
         if max_rows and len(all_rows) >= max_rows:
-            logging.warning(f"Достигнут общий лимит max_rows={max_rows}, остановка выгрузки")
+            print(f"Достигнут общий лимит max_rows={max_rows}, остановка выгрузки")
             all_rows = all_rows[:max_rows]
             break
 
@@ -351,12 +345,21 @@ def get_report_visits_yandex_metric(arguments: dict) -> str:
 
     # Замеряем общее время выполнения
     elapsed = time.perf_counter() - start_time
-    mem_mb = df.memory_usage(deep=True).sum() / (1024 * 1024)
 
-    logging.info(
+    mem_bytes = df.memory_usage(deep=True).sum()
+    if mem_bytes < 1024:
+        mem_str = f"{mem_bytes} Б"
+    elif mem_bytes < 1024 * 1024:
+        mem_str = f"{mem_bytes / 1024:.2f} КБ"
+    elif mem_bytes < 1024 * 1024 * 1024:
+        mem_str = f"{mem_bytes / (1024 * 1024):.2f} МБ"
+    else:
+        mem_str = f"{mem_bytes / (1024 * 1024 * 1024):.2f} ГБ"
+
+    print(
         f"Финальная сводка: строк={len(df)}, "
         f"время={elapsed:.2f} сек, "
-        f"память={mem_mb:.2f} МБ"
+        f"память={mem_str}"
     )
 
     # Возвращаем результат в нужном формате
@@ -405,7 +408,7 @@ if __name__ == "__main__":
     for i, args in enumerate(tests, start=1):
         print(f"\n=== Тест {i} ===")
         try:
-            result = get_report_visits_yandex_metric(args)
+            result = get_report_yandex_metrica_sync(args)
             print("✅ Успех, первые символы ответа:")
             print(str(result)[:300])
         except Exception as e:
