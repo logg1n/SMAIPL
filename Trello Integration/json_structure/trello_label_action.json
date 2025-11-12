@@ -1,0 +1,31 @@
+{
+  "name": "trello_label_action",
+  "description": "Выполняет действия над метками Trello: создание, получение, обновление, удаление.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Тип операции над меткой.",
+        "enum": ["create", "get", "update", "delete"]
+      },
+      "idBoard": {
+        "type": "string",
+        "description": "ID доски Trello. Обязателен для создания метки."
+      },
+      "idLabel": {
+        "type": "string",
+        "description": "ID метки Trello. Обязателен для получения, обновления и удаления."
+      },
+      "name": {
+        "type": "string",
+        "description": "Имя метки. Используется при создании и обновлении."
+      },
+      "color": {
+        "type": "string",
+        "description": "Цвет метки. Допустимые значения: 'green', 'yellow', 'orange', 'red', 'purple', 'blue', 'sky', 'lime', 'pink', 'black', 'none'."
+      }
+    },
+    "required": ["action"]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "name": "trello_board_action",
+  "description": "Выполняет действия над досками Trello: создание, получение, обновление, удаление. Для get можно гибко управлять вложенными ресурсами (cards, lists, labels, members, organization, actions, powerUps).",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Тип операции над доской Trello.",
+        "enum": ["create", "get", "update", "delete"]
+      },
+      "idBoard": {
+        "type": "string",
+        "description": "ID доски Trello. Обязателен для get/update/delete."
+      },
+      "name": {
+        "type": "string",
+        "description": "Имя новой доски. Используется при создании."
+      },
+      "new_name": {
+        "type": "string",
+        "description": "Новое имя доски. Используется при обновлении."
+      },
+      "desc": {
+        "type": "string",
+        "description": "Описание доски. Используется при создании и обновлении."
+      },
+      "prefs_permissionLevel": {
+        "type": "string",
+        "description": "Уровень доступа к доске. Допустимые значения: 'private', 'public', 'org'. По умолчанию 'private'."
+      },
+      "cards": {
+        "type": "string",
+        "description": "Какие карточки включать в ответ. Допустимые значения: 'all', 'open', 'closed', 'visible', 'none'. По умолчанию 'all'."
+      },
+      "lists": {
+        "type": "string",
+        "description": "Какие списки включать в ответ. Допустимые значения: 'all', 'open', 'closed', 'none'. По умолчанию 'all'."
+      },
+      "labels": {
+        "type": "string",
+        "description": "Какие метки включать в ответ. Допустимые значения: 'all', 'none'. По умолчанию 'all'."
+      },
+      "members": {
+        "type": "string",
+        "description": "Каких участников включать в ответ. Допустимые значения: 'all', 'owners', 'admins', 'normal', 'none'. По умолчанию 'all'."
+      },
+      "organization": {
+        "type": "string",
+        "description": "Включать ли организацию. Допустимые значения: 'true', 'false'. По умолчанию 'false'."
+      },
+      "actions": {
+        "type": "string",
+        "description": "Какие действия включать. Допустимые значения: 'all' или список типов (например: 'commentCard,updateCard:idList'). По умолчанию 'none'."
+      },
+      "powerUps": {
+        "type": "string",
+        "description": "Включать ли PowerUps. Допустимые значения: 'true', 'false'. По умолчанию 'false'."
+      }
+    },
+    "required": ["action"]
+  }
+}
