@@ -1,54 +1,51 @@
 {
   "name": "trello_card_action",
-  "description": "Выполняет действия над карточками Trello: create, get, update, delete",
+  "description": "Выполняет действия над карточками Trello: создание, получение, обновление, удаление.",
   "parameters": {
     "type": "object",
     "properties": {
       "action": {
         "type": "string",
-        "enum": ["create", "get", "update", "delete"],
-        "description": "Тип действия над карточкой Trello"
+        "description": "Тип действия над карточкой.",
+        "enum": ["create", "get", "update", "delete"]
       },
       "idList": {
         "type": "string",
-        "description": "ID списка (обязателен для create)"
+        "description": "ID списка. Обязателен для действия 'create'."
       },
       "idCard": {
         "type": "string",
-        "description": "ID карточки (обязателен для get/update/delete)"
+        "description": "ID карточки. Обязателен для действий 'get', 'update', 'delete'."
       },
       "name": {
         "type": "string",
-        "description": "Название карточки"
+        "description": "Название карточки."
       },
       "desc": {
         "type": "string",
-        "description": "Описание карточки"
+        "description": "Описание карточки."
       },
       "pos": {
-        "oneOf": [
-          { "type": "string", "enum": ["top", "bottom"] },
-          { "type": "integer", "minimum": 0 }
-        ],
-        "description": "Позиция карточки ('top', 'bottom' или число)"
+        "type": ["string", "integer"],
+        "description": "Позиция карточки: 'top', 'bottom' или число."
       },
       "due": {
         "type": "string",
-        "description": "Срок выполнения (ISO‑дата в формате YYYY-MM-DDTHH:MM:SSZ)"
+        "description": "Срок выполнения (ISO‑дата)."
       },
       "start": {
         "type": "string",
-        "description": "Дата начала (ISO‑дата)"
+        "description": "Дата начала (ISO‑дата)."
       },
       "idMembers": {
         "type": "array",
         "items": { "type": "string" },
-        "description": "Список ID участников"
+        "description": "Список ID участников."
       },
       "idLabels": {
         "type": "array",
         "items": { "type": "string" },
-        "description": "Список ID меток"
+        "description": "Список ID меток."
       }
     },
     "required": ["action"]

@@ -1,17 +1,17 @@
 {
   "name": "trello_board_action",
-  "description": "Выполняет действия над досками Trello: создание, получение, обновление, удаление. Для get можно гибко управлять вложенными ресурсами (cards, lists, labels, members, organization, actions, powerUps).",
+  "description": "Выполняет действия над досками Trello: создание, получение, обновление, удаление.",
   "parameters": {
     "type": "object",
     "properties": {
       "action": {
         "type": "string",
-        "description": "Тип операции над доской Trello.",
+        "description": "Тип действия над доской.",
         "enum": ["create", "get", "update", "delete"]
       },
       "idBoard": {
         "type": "string",
-        "description": "ID доски Trello. Обязателен для get/update/delete."
+        "description": "ID доски. Обязателен для действий 'get', 'update', 'delete'."
       },
       "name": {
         "type": "string",
@@ -27,35 +27,55 @@
       },
       "prefs_permissionLevel": {
         "type": "string",
-        "description": "Уровень доступа к доске. Допустимые значения: 'private', 'public', 'org'. По умолчанию 'private'."
+        "description": "Уровень доступа к доске.",
+        "enum": ["private", "public", "org"]
+      },
+      "defaultLists": {
+        "type": "string",
+        "description": "Создавать стандартные списки при создании доски.",
+        "enum": ["true", "false"]
+      },
+      "defaultLabels": {
+        "type": "string",
+        "description": "Создавать стандартные метки при создании доски.",
+        "enum": ["true", "false"]
+      },
+      "fields": {
+        "type": "string",
+        "description": "Список полей доски для возврата (CSV). По умолчанию: name,desc,prefs,url,shortLink."
       },
       "cards": {
         "type": "string",
-        "description": "Какие карточки включать в ответ. Допустимые значения: 'all', 'open', 'closed', 'visible', 'none'. По умолчанию 'all'."
+        "description": "Включение карточек в ответ.",
+        "enum": ["all", "open", "closed", "visible", "none"]
       },
       "lists": {
         "type": "string",
-        "description": "Какие списки включать в ответ. Допустимые значения: 'all', 'open', 'closed', 'none'. По умолчанию 'all'."
+        "description": "Включение списков в ответ.",
+        "enum": ["all", "open", "closed", "none"]
       },
       "labels": {
         "type": "string",
-        "description": "Какие метки включать в ответ. Допустимые значения: 'all', 'none'. По умолчанию 'all'."
+        "description": "Включение меток в ответ.",
+        "enum": ["all", "none"]
       },
       "members": {
         "type": "string",
-        "description": "Каких участников включать в ответ. Допустимые значения: 'all', 'owners', 'admins', 'normal', 'none'. По умолчанию 'all'."
+        "description": "Включение участников в ответ.",
+        "enum": ["all", "owners", "admins", "normal", "none"]
       },
       "organization": {
-        "type": "string",
-        "description": "Включать ли организацию. Допустимые значения: 'true', 'false'. По умолчанию 'false'."
+        "type": ["string", "boolean"],
+        "description": "Включить информацию об организации в ответ."
       },
       "actions": {
         "type": "string",
-        "description": "Какие действия включать. Допустимые значения: 'all' или список типов (например: 'commentCard,updateCard:idList'). По умолчанию 'none'."
+        "description": "Включение действий: 'all' или CSV-строка типов (например: commentCard,updateCard:idList)."
       },
       "powerUps": {
         "type": "string",
-        "description": "Включать ли PowerUps. Допустимые значения: 'true', 'false'. По умолчанию 'false'."
+        "description": "Состояние Power-Ups.",
+        "enum": ["all", "enabled", "none"]
       }
     },
     "required": ["action"]

@@ -1,33 +1,33 @@
 {
   "name": "trello_list_action",
-  "description": "Выполняет действия над списками Trello: создание, получение или обновление. Требует заранее полученные идентификаторы доски и списка. Модель должна использовать resolver-функции, если ID не указаны.",
+  "description": "Выполняет действия над списками Trello: создание, получение, обновление.",
   "parameters": {
     "type": "object",
     "properties": {
       "action": {
         "type": "string",
-        "description": "Тип операции над списком Trello. Возможные значения: 'create', 'get', 'update'.",
+        "description": "Тип действия над списком.",
         "enum": ["create", "get", "update"]
       },
       "idBoard": {
         "type": "string",
-        "description": "Идентификатор доски Trello. Обязателен для 'create' и 'update'. Если не указан, модель должна вызвать функцию поиска доски."
-      },
-      "idList": {
-        "type": "string",
-        "description": "Идентификатор списка Trello. Обязателен для 'get' и 'update'. Если не указан, модель должна вызвать функцию поиска списка."
+        "description": "ID доски. Обязателен для 'create', используется для перемещения при 'update'."
       },
       "nameList": {
         "type": "string",
-        "description": "Имя создаваемого списка. Используется только при действии 'create'."
+        "description": "Имя нового списка. Обязателен для 'create'."
+      },
+      "idList": {
+        "type": "string",
+        "description": "ID списка. Обязателен для 'get' и 'update'."
       },
       "newNameList": {
         "type": "string",
-        "description": "Новое имя списка. Используется при действии 'update'."
+        "description": "Новое имя списка. Используется при 'update'."
       },
       "closed": {
         "type": "boolean",
-        "description": "Архивировать или разархивировать список. Допустимые значения: 'true' или 'false'. Используется при 'update'."
+        "description": "Архивировать (true) или разархивировать (false) список. Используется при 'update'."
       }
     },
     "required": ["action"]

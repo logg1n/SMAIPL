@@ -1,41 +1,92 @@
-import json
-from typing import Any
-
-import requests
 from config import API_KEY_TRELLO, API_TOKEN_TRELLO
 
 def trello_board_action(arguments: dict) -> str:
     """
-    Выполняет действия над досками Trello: создание, получение, обновление, удаление.
+    Выполняет действия над досками Trello: создание, получение, обновление и удаление.
+    Функция работает как универсальный маршрутизатор: в зависимости от значения параметра "action"
+    формируется запрос к соответствующему эндпоинту Trello API.
+
+    Авторизация:
+        - Для работы функции требуется ключ и токен Trello API.
+        - Они загружаются из переменных окружения и доступны в коде как:
+            - API_KEY_TRELLO   = os.getenv("API_KEY_TRELLO")
+            - API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
+        - Эти значения автоматически добавляются в каждый запрос.
+        - При отсутствии ключа/токена запросы будут отклоняться (например, HTTP 401).
+
+    Поддерживаемые действия (action):
+        - "create": Создать новую доску.
+            Эндпоинт: POST /boards
+            Обязательные параметры:
+                - name (str): Имя новой доски.
+            Дополнительные параметры:
+                - desc (str): Описание.
+                - prefs_permissionLevel (str): Уровень доступа ("private", "public", "org").
+                - defaultLists (str): Создавать стандартные списки ("true"/"false").
+                - defaultLabels (str): Создавать стандартные метки ("true"/"false").
+
+        - "get": Получить информацию о доске и вложенных ресурсах.
+            Эндпоинт: GET /boards/{idBoard}
+            Обязательные параметры:
+                - idBoard (str): ID доски.
+            Дополнительные параметры:
+                - fields (str): Список полей доски (по умолчанию "name,desc,prefs,url,shortLink").
+                - cards (str): "all", "open", "closed", "visible", "none".
+                - lists (str): "all", "open", "closed", "none".
+                - labels (str): "all", "none".
+                - members (str): "all", "owners", "admins", "normal", "none".
+                - organization (bool|str): Включить организацию (True/False).
+                - actions (str): "all" или CSV-строка типов (например: "commentCard,updateCard:idList").
+                - powerUps (str): "all", "enabled", "none".
+
+        - "update": Обновить свойства доски.
+            Эндпоинт: PUT /boards/{idBoard}
+            Обязательные параметры:
+                - idBoard (str): ID доски.
+            Дополнительные параметры:
+                - new_name (str): Новое имя.
+                - desc (str): Новое описание.
+                - prefs_permissionLevel (str): Новый уровень доступа ("private", "public", "org").
+            Примечание:
+                - хотя бы один из параметров ("new_name", "desc", "prefs_permissionLevel") должен быть указан.
+
+        - "delete": Удалить доску.
+            Эндпоинт: DELETE /boards/{idBoard}
+            Обязательные параметры:
+                - idBoard (str): ID доски.
 
     Аргументы:
-        - action (str): "create", "get", "update", "delete"
-        - idBoard (str): ID доски (для get/update/delete)
-        - name (str): имя новой доски (для create)
-        - new_name (str): новое имя доски (для update)
-        - desc (str): описание доски (для create/update)
-        - prefs_permissionLevel (str): уровень доступа ("private", "public", "org")
-
-        --- GET ---
-        Допустимые значения для вложенных ресурсов:
-            - cards: "all", "open", "closed", "visible", "none" (по умолчанию "all")
-            - lists: "all", "open", "closed", "none" (по умолчанию "all")
-            - labels: "all", "none" (по умолчанию "all")
-            - members: "all", "owners", "admins", "normal", "none" (по умолчанию "all")
-            - organization: boolean (True/False, по умолчанию False)
-            - actions: "all" или список типов (например: "commentCard,updateCard:idList"). По умолчанию не включается.
-            - powerUps: "all", "enabled", "none" (по умолчанию "none")
-
-        Примечание:
-        Для авторизации в Trello API используются переменные окружения:
-        - API_KEY_TRELLO
-        - API_TOKEN_TRELLO
-        Они импортируются из config.py и автоматически добавляются во все запросы.
-        Пользователю не нужно передавать их в arguments.
+        arguments (dict): Словарь с параметрами запроса.
+            - action (str, обязательно): Тип действия ("create", "get", "update", "delete").
+            - idBoard (str): ID доски (для "get", "update", "delete").
+            - name (str): Имя новой доски (для "create").
+            - new_name (str): Новое имя доски (для "update").
+            - desc (str): Описание (для "create"/"update").
+            - prefs_permissionLevel (str): Уровень доступа ("private", "public", "org").
+            - defaultLists (str): Создавать стандартные списки ("true"/"false").
+            - defaultLabels (str): Создавать стандартные метки ("true"/"false").
+            - fields, cards, lists, labels, members, organization, actions, powerUps: параметры для включения вложенных ресурсов (для "get").
 
     Возвращает:
-        str: JSON-строка с результатом запроса к Trello API.
+        str: JSON-строка с результатом запроса.
+            - При успешном запросе: данные, полученные от Trello API (созданная доска,
+              информация о доске, результат обновления или удаления).
+            - При ошибке: объект с ключами:
+                - "error": описание ошибки,
+                - "status": HTTP-код,
+                - "body": текст ответа сервера.
     """
+
+
+    import json
+    import requests
+    # from dotenv import load_dotenv
+
+    # load_dotenv()
+
+    # API_KEY_TRELLO = os.getenv("API_KEY_TRELLO")
+    # API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
+
 
     action: str = arguments.get("action")
     if action not in ["create", "get", "update", "delete"]:

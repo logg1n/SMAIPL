@@ -3,38 +3,97 @@ from config import API_KEY_TRELLO, API_TOKEN_TRELLO
 
 def trello_list_action(arguments: dict) -> str:
     """
-    Выполняет действия над списками Trello.
+    Выполняет действия над списками Trello: создание, получение и обновление.
+    Функция работает как универсальный маршрутизатор: в зависимости от значения параметра "action"
+    формируется запрос к соответствующему эндпоинту Trello API.
+
+    Авторизация:
+        - Для работы функции требуется ключ и токен Trello API.
+        - Они загружаются из переменных окружения и доступны в коде как:
+            - API_KEY_TRELLO   = os.getenv("API_KEY_TRELLO")
+            - API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
+        - Эти значения автоматически добавляются в каждый запрос.
+        - При отсутствии ключа/токена запросы будут отклоняться (например, HTTP 401).
+
+    Поддерживаемые действия (action):
+        - "create": Создать новый список.
+            Эндпоинт: POST /lists
+            Обязательные параметры:
+                - idBoard (str): ID доски.
+                - nameList (str): Имя нового списка.
+
+        - "get": Получить информацию о списке.
+            Эндпоинт: GET /lists/{idList}
+            Обязательные параметры:
+                - idList (str): ID списка.
+            Дополнительные параметры:
+                - fields (str): Список полей (по умолчанию "id,name,closed").
+
+        - "update": Обновить список.
+            Эндпоинт: PUT /lists/{idList}
+            Обязательные параметры:
+                - idList (str): ID списка.
+            Дополнительные параметры:
+                - newNameList (str): Новое имя списка.
+                - idBoard (str): ID доски, если нужно переместить список.
+                - closed (bool): True — архивировать, False — разархивировать.
 
     Аргументы:
-        arguments (dict):
-            - action (str): Тип операции. Возможные значения:
-                - "create" : создать список
-                - "get"    : получить список по ID
-                - "update" : обновить список по ID (переименовать, переместить, архивировать)
-
-            --- create ---
-            Обязательные ключи:
-                - idBoard (str): идентификатор доски
-                - nameList (str): имя создаваемого списка
-
-            --- get ---
-            Обязательные ключи:
-                - idList (str): идентификатор списка
-
-            --- update ---
-            Обязательные ключи:
-                - idList (str): идентификатор списка
-            Необязательные ключи:
-                - newNameList (str): новое имя списка
-                - idBoard (str): ID доски, если нужно переместить
-                - closed (bool): True — архивировать, False — разархивировать
+        arguments (dict): Словарь с параметрами запроса.
+            - action (str, обязательно): Тип действия ("create", "get", "update").
+            - idBoard (str): ID доски (для "create", опционально для "update").
+            - nameList (str): Имя нового списка (для "create").
+            - idList (str): ID списка (для "get" и "update").
+            - newNameList (str): Новое имя списка (для "update").
+            - closed (bool): Архивировать или разархивировать список (для "update").
 
     Возвращает:
-        str: JSON-строка с результатом выполнения запроса к Trello API.
+        str: JSON-строка с результатом запроса.
+            - При успешном запросе: данные, полученные от Trello API (созданный список,
+              информация о списке, результат обновления).
+            - При ошибке: объект с ключами:
+                - "error": описание ошибки,
+                - "status": HTTP-код,
+                - "body": текст ответа сервера.
+
+    Примеры:
+        Создание списка:
+            trello_list_action({
+                "action": "create",
+                "idBoard": "62f9876543210abcd9876543",
+                "nameList": "To Do"
+            })
+
+        Получение списка:
+            trello_list_action({
+                "action": "get",
+                "idList": "64f1234567890abcd1234567"
+            })
+
+        Обновление списка (переименование):
+            trello_list_action({
+                "action": "update",
+                "idList": "64f1234567890abcd1234567",
+                "newNameList": "In Progress"
+            })
+
+        Архивирование списка:
+            trello_list_action({
+                "action": "update",
+                "idList": "64f1234567890abcd1234567",
+                "closed": True
+            })
     """
+
 
     import json
     import requests
+    # from dotenv import load_dotenv
+
+    # load_dotenv()
+
+    # API_KEY_TRELLO = os.getenv("API_KEY_TRELLO")
+    # API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
 
 
     action: str = arguments.get("action")
