@@ -1,0 +1,103 @@
+{
+  "name": "trello_search",
+  "description": "Выполняет поиск по Trello через Search API и возвращает нормализованный результат.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "query": {
+        "type": "string",
+        "description": "Строка поиска (обязательный параметр). Поддерживает слова, ID, хэши, спецсимволы."
+      },
+      "modelTypes": {
+        "type": "string",
+        "description": "CSV-строка типов сущностей для поиска. Допустимые значения: boards, cards, members, organizations. По умолчанию: boards,cards,members,organizations.",
+        "enum": [
+          "boards",
+          "cards",
+          "members",
+          "organizations",
+          "boards,cards",
+          "boards,members",
+          "boards,organizations",
+          "cards,members",
+          "cards,organizations",
+          "members,organizations",
+          "boards,cards,members",
+          "boards,cards,organizations",
+          "boards,members,organizations",
+          "cards,members,organizations",
+          "boards,cards,members,organizations"
+        ]
+      },
+      "board_fields": {
+        "type": "string",
+        "description": "CSV-строка полей для объектов boards. По умолчанию: id,name.",
+        "enum": [
+          "id",
+          "name",
+          "desc",
+          "url",
+          "shortLink",
+          "closed",
+          "pinned",
+          "starred",
+          "idOrganization",
+          "prefs",
+          "dateLastActivity"
+        ]
+      },
+      "card_fields": {
+        "type": "string",
+        "description": "CSV-строка полей для объектов cards. По умолчанию: id,name,idBoard.",
+        "enum": [
+          "id",
+          "name",
+          "desc",
+          "url",
+          "shortLink",
+          "idBoard",
+          "idList",
+          "idMembers",
+          "labels",
+          "due",
+          "start",
+          "dueComplete",
+          "closed",
+          "dateLastActivity"
+        ]
+      },
+      "member_fields": {
+        "type": "string",
+        "description": "CSV-строка полей для объектов members. По умолчанию: id,username,fullName.",
+        "enum": [
+          "id",
+          "username",
+          "fullName",
+          "initials",
+          "avatarUrl",
+          "bio",
+          "confirmed",
+          "memberType",
+          "status",
+          "url"
+        ]
+      },
+      "organization_fields": {
+        "type": "string",
+        "description": "CSV-строка полей для объектов organizations. По умолчанию: id,name,displayName.",
+        "enum": [
+          "id",
+          "name",
+          "displayName",
+          "desc",
+          "website",
+          "logoHash",
+          "url",
+          "products",
+          "prefs"
+        ]
+      }
+    },
+    "required": ["query"]
+  }
+}

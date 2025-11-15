@@ -1,6 +1,5 @@
-import json
-import requests
 from config import API_KEY_TRELLO, API_TOKEN_TRELLO
+
 
 def trello_card_action(arguments: dict) -> str:
     """
@@ -21,6 +20,9 @@ def trello_card_action(arguments: dict) -> str:
     Возвращает:
         str: JSON‑строка с результатом запроса.
     """
+
+    import json
+    import requests
 
     action = arguments.get("action")
     if action not in ["create", "get", "update", "delete"]:

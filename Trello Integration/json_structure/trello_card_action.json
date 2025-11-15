@@ -1,0 +1,56 @@
+{
+  "name": "trello_card_action",
+  "description": "Выполняет действия над карточками Trello: create, get, update, delete",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["create", "get", "update", "delete"],
+        "description": "Тип действия над карточкой Trello"
+      },
+      "idList": {
+        "type": "string",
+        "description": "ID списка (обязателен для create)"
+      },
+      "idCard": {
+        "type": "string",
+        "description": "ID карточки (обязателен для get/update/delete)"
+      },
+      "name": {
+        "type": "string",
+        "description": "Название карточки"
+      },
+      "desc": {
+        "type": "string",
+        "description": "Описание карточки"
+      },
+      "pos": {
+        "oneOf": [
+          { "type": "string", "enum": ["top", "bottom"] },
+          { "type": "integer", "minimum": 0 }
+        ],
+        "description": "Позиция карточки ('top', 'bottom' или число)"
+      },
+      "due": {
+        "type": "string",
+        "description": "Срок выполнения (ISO‑дата в формате YYYY-MM-DDTHH:MM:SSZ)"
+      },
+      "start": {
+        "type": "string",
+        "description": "Дата начала (ISO‑дата)"
+      },
+      "idMembers": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Список ID участников"
+      },
+      "idLabels": {
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "Список ID меток"
+      }
+    },
+    "required": ["action"]
+  }
+}

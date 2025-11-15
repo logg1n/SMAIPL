@@ -1,0 +1,68 @@
+{
+  "name": "trello_member_action",
+  "description": "Выполняет действия над участниками Trello: получение информации, досок, карточек, действий, организаций и уведомлений.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "description": "Тип действия",
+        "enum": [
+          "get_info",
+          "get_me",
+          "get_boards",
+          "get_cards",
+          "get_actions",
+          "get_organizations",
+          "get_notifications"
+        ]
+      },
+      "idMember": {
+        "type": "string",
+        "description": "ID участника Trello или 'me'. Не требуется для get_me."
+      },
+
+      "fields": {
+        "type": "string",
+        "description": "Только для get_info. Допустимые поля: avatarHash, avatarUrl, bio, confirmed, fullName, initials, memberType, products, status, url, username"
+      },
+
+      "filter": {
+        "type": "string",
+        "description": "Фильтр для get_cards, get_actions, get_notifications. Допустимые значения зависят от action.",
+        "enum": [
+          "visible", "none", "open", "closed", "all",
+          "commentCard", "updateCard", "createCard", "deleteCard",
+          "addAttachmentToCard", "removeAttachmentFromCard",
+          "addMemberToCard", "removeMemberFromCard",
+          "updateCheckItemStateOnCard", "createList", "updateList",
+          "createBoard", "closeBoard", "emailCard", "moveCardToBoard",
+          "convertToCardFromCheckItem", "voteOnCard", "unvoteOnCard",
+          "createLabel", "addLabelToCard", "removeLabelFromCard",
+          "updateLabel", "createChecklist", "updateChecklist",
+          "removeChecklist", "createCustomField", "updateCustomField",
+          "removeCustomField", "updateCustomFieldItem",
+          "mentionCard", "invitation", "changeCard"
+        ]
+      },
+
+      "limit": {
+        "type": "integer",
+        "description": "Ограничение количества результатов (для get_actions, get_notifications). Максимум: 1000"
+      },
+
+      "since": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Начальная дата периода (ISO 8601) для get_actions"
+      },
+
+      "before": {
+        "type": "string",
+        "format": "date-time",
+        "description": "Конечная дата периода (ISO 8601) для get_actions"
+      }
+    },
+    "required": ["action"]
+  }
+}

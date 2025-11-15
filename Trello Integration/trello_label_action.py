@@ -1,27 +1,82 @@
-import json
-import requests
 from config import API_KEY_TRELLO, API_TOKEN_TRELLO
 
 def trello_label_action(arguments: dict) -> str:
     """
-    Выполняет действия над метками Trello: создание, получение, обновление, удаление.
+    Выполняет действия над метками Trello: создание, получение, обновление и удаление.
+    Функция работает как универсальный маршрутизатор: в зависимости от значения параметра "action"
+    формируется запрос к соответствующему эндпоинту Trello API.
+
+    Авторизация:
+        - Для работы функции требуется ключ и токен Trello API.
+        - Они загружаются напрямую из переменных окружения через load_dotenv() и os.getenv():
+            - API_KEY_TRELLO   = os.getenv("API_KEY_TRELLO")
+            - API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
+        - При отсутствии ключа/токена запросы будут отклоняться (например, HTTP 401).
+
+    Поддерживаемые действия (action):
+        - "create": Создать новую метку.
+            Эндпоинт: POST /labels
+            Обязательные параметры:
+                - idBoard (str): ID доски, к которой будет привязана метка.
+                - name (str): Имя метки.
+            Дополнительный параметр:
+                - color (str): Цвет метки. Допустимые значения:
+                  "green", "yellow", "orange", "red", "purple", "blue", "sky",
+                  "lime", "pink", "black", "none".
+                  По умолчанию: "none".
+
+        - "get": Получить информацию о метке.
+            Эндпоинт: GET /labels/{idLabel}
+            Обязательные параметры:
+                - idLabel (str): ID метки.
+            Дополнительные параметры:
+                - fields (str): Список полей для возврата. По умолчанию: "id,name,color".
+
+        - "update": Обновить метку.
+            Эндпоинт: PUT /labels/{idLabel}
+            Обязательные параметры:
+                - idLabel (str): ID метки.
+            Дополнительные параметры:
+                - name (str): Новое имя метки.
+                - color (str): Новый цвет метки.
+            Примечание:
+                - хотя бы один из параметров ("name" или "color") должен быть указан,
+                  иначе вернётся ошибка "Nothing to update".
+
+        - "delete": Удалить метку.
+            Эндпоинт: DELETE /labels/{idLabel}
+            Обязательные параметры:
+                - idLabel (str): ID метки.
 
     Аргументы:
-        - action (str): "create", "get", "update", "delete"
-        - idBoard (str): ID доски (обязателен для create)
-        - idLabel (str): ID метки (обязателен для get/update/delete)
-        - name (str): имя метки (для create/update)
-        - color (str): цвет метки (для create/update). Допустимые значения:
-            "green", "yellow", "orange", "red", "purple", "blue", "sky",
-            "lime", "pink", "black", "none"
-
-    Примечание:
-        Для авторизации используются переменные окружения API_KEY_TRELLO и API_TOKEN_TRELLO.
-        Они импортируются из config.py и автоматически добавляются во все запросы.
+        arguments (dict): Словарь с параметрами запроса.
+            - action (str, обязательно): Тип действия ("create", "get", "update", "delete").
+            - idBoard (str): ID доски. Обязателен для "create".
+            - idLabel (str): ID метки. Обязателен для "get", "update", "delete".
+            - name (str): Имя метки. Используется для "create" и "update".
+            - color (str): Цвет метки. Используется для "create" и "update".
+              Допустимые значения: "green", "yellow", "orange", "red", "purple",
+              "blue", "sky", "lime", "pink", "black", "none".
 
     Возвращает:
-        str: JSON-строка с результатом запроса к Trello API.
+        str: JSON-строка с результатом запроса.
+            - При успешном запросе: данные, полученные от Trello API (созданная метка,
+              информация о метке, результат обновления или удаления).
+            - При ошибке: объект с ключами:
+                - "error": описание ошибки,
+                - "status": HTTP-код,
+                - "body": текст ответа сервера.
     """
+
+    import json
+    import requests
+    # from dotenv import load_dotenv
+
+    # load_dotenv()
+
+    # API_KEY_TRELLO = os.getenv("API_KEY_TRELLO")
+    # API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
+
 
     action: str = arguments.get("action")
     if action not in ["create", "get", "update", "delete"]:
