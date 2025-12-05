@@ -1,33 +1,46 @@
 {
   "name": "trello_list_action",
-  "description": "Выполняет действия над списками Trello: создание, получение, обновление.",
+  "description": "Выполняет действия над списками Trello: создание, получение и обновление. Универсальный маршрутизатор для Trello API.",
   "parameters": {
     "type": "object",
     "properties": {
       "action": {
         "type": "string",
-        "description": "Тип действия над списком.",
+        "description": "Тип действия над списком Trello.",
         "enum": ["create", "get", "update"]
       },
-      "idBoard": {
+      "id_board": {
         "type": "string",
-        "description": "ID доски. Обязателен для 'create', используется для перемещения при 'update'."
+        "description": "ID доски Trello. Используется для create и update."
       },
-      "nameList": {
+      "name_board": {
         "type": "string",
-        "description": "Имя нового списка. Обязателен для 'create'."
+        "description": "Имя доски Trello, если неизвестен id_board."
       },
-      "idList": {
+      "id_list": {
         "type": "string",
-        "description": "ID списка. Обязателен для 'get' и 'update'."
+        "description": "ID списка Trello. Используется для get и update."
       },
-      "newNameList": {
+      "name_list": {
         "type": "string",
-        "description": "Новое имя списка. Используется при 'update'."
+        "description": "Имя списка Trello, если неизвестен id_list."
+      },
+      "new_name_list": {
+        "type": "string",
+        "description": "Новое имя списка. Используется при create и update."
       },
       "closed": {
-        "type": "boolean",
-        "description": "Архивировать (true) или разархивировать (false) список. Используется при 'update'."
+        "type": "string",
+        "description": "Архивировать (true) или разархивировать (false) список.",
+        "enum": ["true", "false"]
+      },
+      "api_key_trello": {
+        "type": "string",
+        "description": "Ключ доступа Trello API. Может быть передан явно или подтянут из окружения."
+      },
+      "api_token_trello": {
+        "type": "string",
+        "description": "Токен доступа Trello API. Может быть передан явно или подтянут из окружения."
       }
     },
     "required": ["action"]
